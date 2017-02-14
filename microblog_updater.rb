@@ -46,7 +46,7 @@ class MicroblogUpdater
   def new_tweets
     feed_posts.reject do |post|
       expired?(post.published_at) ||
-      existing_tweets.any? { |t| t.text.start_with?(post.summary) }
+      existing_tweets.any? { |t| t.text.start_with?(post.truncated_summary) }
     end
   end
 
