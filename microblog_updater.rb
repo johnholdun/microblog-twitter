@@ -31,7 +31,7 @@ class MicroblogUpdater
     new_tweets.each do |status|
       print "Creating '#{status.summary}'..."
       response = twitter_client.update(status.summary)
-      puts response.try(:id)
+      puts response.id
     end
   end
 
