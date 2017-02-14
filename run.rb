@@ -3,7 +3,7 @@ require 'bundler'
 require 'yaml'
 
 Bundler.require(:default, :development)
-Dotenv.load
+Dotenv.load if defined?(Dotenv)
 
 require './feed_reader'
 require './microblog_updater'
