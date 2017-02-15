@@ -33,23 +33,24 @@ class Status
   attr_reader :entry, :short_url_length
 
   def tweetable?
-    urls.size <= 1 && (summary_without_urls.size + urls.size * (short_url_length + 1)) <= 140
+    urls.size <= 1 && (parsed_summary.size + urls.size * (short_url_length + 1)) <= 140
   end
 
   def full_summary
-    @full_summary ||= "#{summary_without_urls} #{urls.join(' ')}".strip
+    @full_summary ||= "#{parsed_summary} #{urls.join(' ')}".strip
   end
 
-  def summary_without_urls
-    @summary_without_urls ||= ReverseMarkdown.convert(pre_parsed_summary).strip
-  end
-
-  def pre_parsed_summary
-    %i(
-      summary_with_stars
-      summary_without_links
-      summary_without_some_tags
-    ).inject(entry.summary) { |string, method_name| send(method_name, string) }
+  def parsed_summary
+    @parsed_summary ||=
+      %i(
+        summary_with_stars
+        summary_without_links
+        summary_without_some_tags
+        summary_into_markdown
+        summary_without_escapes
+      ).inject(entry.summary) do |string, method_name|
+        send(method_name, string)
+      end
   end
 
   def summary_with_stars(text)
@@ -65,6 +66,14 @@ class Status
       el = tag.scan(/^<\/?(.+?)(?: |>)/).flatten.first
       tag if ACCEPTED_TAGS.include?(el)
     end
+  end
+
+  def summary_into_markdown(text)
+    ReverseMarkdown.convert(text).strip
+  end
+
+  def summary_without_escapes(text)
+    text.gsub(/\\\*/, '*')
   end
 
   def urls
